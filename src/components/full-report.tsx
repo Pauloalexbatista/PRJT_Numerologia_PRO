@@ -31,27 +31,37 @@ export function FullReport({ profile }: FullReportProps) {
 
     const handleDownloadPDF = async () => {
         const element = document.getElementById('pdf-export-container');
-        if (!element) return;
+        if (!element) {
+            alert("Erro: Container PDF não encontrado.");
+            return;
+        }
 
         const btn = document.getElementById('btn-download-pdf');
         if (btn) btn.innerHTML = '⏳ Gerando...';
 
+        // Store original styles
+        const originalDisplay = element.style.display;
+        const originalPosition = element.style.position;
+        const originalLeft = element.style.left;
+
         try {
-            const canvas = await import('html2canvas').then(m => m.default(element, {
+            // Temporarily make visible (off-screen)
+            element.style.display = 'block';
+            element.style.position = 'absolute';
+            element.style.left = '-9999px';
+
+            // Wait for styles to apply
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Import and use html2canvas
+            const html2canvas = (await import('html2canvas')).default;
+            const canvas = await html2canvas(element, {
                 backgroundColor: '#050510',
                 useCORS: true,
                 scale: 2,
-                logging: false,
-                onclone: (doc) => {
-                    const el = doc.getElementById('pdf-export-container');
-                    if (el) {
-                        el.style.position = 'static';
-                        el.style.top = '0';
-                        el.style.left = '0';
-                        el.style.display = 'block';
-                    }
-                }
-            }));
+                logging: true,
+                windowWidth: 1000
+            });
 
             const imgData = canvas.toDataURL('image/jpeg', 0.85);
             const jsPDF = (await import('jspdf')).default;
@@ -72,9 +82,15 @@ export function FullReport({ profile }: FullReportProps) {
             pdf.save(`Mapa_Numerologico_${profile.name.replace(/\s+/g, '_')}.pdf`);
 
         } catch (err) {
-            console.error("PDF Fail", err);
-            alert("Erro ao criar PDF. Tente novamente.");
+            console.error("PDF Generation Error:", err);
+            const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido';
+            alert(`Erro ao criar PDF: ${errorMsg}`);
         } finally {
+            // Restore original styles
+            element.style.display = originalDisplay;
+            element.style.position = originalPosition;
+            element.style.left = originalLeft;
+
             if (btn) btn.innerHTML = '📥 Baixar Mapa (PDF)';
         }
     };
