@@ -48,7 +48,14 @@ export function FullReport({ profile }: FullReportProps) {
         const styleEl = document.createElement('style');
         styleEl.id = 'pdf-color-override';
         styleEl.innerHTML = `
+            #pdf-export-container * {
+                color: inherit !important;
+                border-color: inherit !important;
+                background-color: transparent !important;
+            }
+            #pdf-export-container { background-color: #050510 !important; }
             #pdf-export-container .text-primary { color: #FFD700 !important; }
+            #pdf-export-container .text-gray-200 { color: #E5E7EB !important; }
             #pdf-export-container .text-gray-300 { color: #D1D5DB !important; }
             #pdf-export-container .text-gray-400 { color: #9CA3AF !important; }
             #pdf-export-container .text-gray-500 { color: #6B7280 !important; }
@@ -60,10 +67,16 @@ export function FullReport({ profile }: FullReportProps) {
             #pdf-export-container .bg-gray-900 { background-color: #111827 !important; }
             #pdf-export-container .bg-gray-800 { background-color: #1F2937 !important; }
             #pdf-export-container .bg-red-900 { background-color: #7F1D1D !important; }
+            #pdf-export-container .bg-red-900\\/20 { background-color: rgba(127, 29, 29, 0.2) !important; }
             #pdf-export-container .border-primary { border-color: #FFD700 !important; }
             #pdf-export-container .border-white { border-color: #FFFFFF !important; }
+            #pdf-export-container .border-white\\/10 { border-color: rgba(255, 255, 255, 0.1) !important; }
             #pdf-export-container .border-gray-800 { border-color: #1F2937 !important; }
             #pdf-export-container .border-red-500 { border-color: #EF4444 !important; }
+            #pdf-export-container .border-red-500\\/30 { border-color: rgba(239, 68, 68, 0.3) !important; }
+            #pdf-export-container .border-l-4 { border-left-width: 4px !important; border-left-style: solid !important; }
+            #pdf-export-container .border-b { border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+            #pdf-export-container .border { border-width: 1px !important; border-style: solid !important; }
         `;
         document.head.appendChild(styleEl);
 
@@ -74,7 +87,7 @@ export function FullReport({ profile }: FullReportProps) {
             element.style.left = '-9999px';
 
             // Wait for styles to apply
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 300));
 
             // Import and use html2canvas
             const html2canvas = (await import('html2canvas')).default;
@@ -82,8 +95,12 @@ export function FullReport({ profile }: FullReportProps) {
                 backgroundColor: '#050510',
                 useCORS: true,
                 scale: 2,
-                logging: true,
-                windowWidth: 1000
+                logging: false,
+                windowWidth: 1000,
+                ignoreElements: (el) => {
+                    // Skip elements that might have problematic styles
+                    return false;
+                }
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 0.85);
