@@ -44,6 +44,29 @@ export function FullReport({ profile }: FullReportProps) {
         const originalPosition = element.style.position;
         const originalLeft = element.style.left;
 
+        // Create style element to override oklab colors with RGB
+        const styleEl = document.createElement('style');
+        styleEl.id = 'pdf-color-override';
+        styleEl.innerHTML = `
+            #pdf-export-container .text-primary { color: #FFD700 !important; }
+            #pdf-export-container .text-gray-300 { color: #D1D5DB !important; }
+            #pdf-export-container .text-gray-400 { color: #9CA3AF !important; }
+            #pdf-export-container .text-gray-500 { color: #6B7280 !important; }
+            #pdf-export-container .text-white { color: #FFFFFF !important; }
+            #pdf-export-container .text-red-200 { color: #FECACA !important; }
+            #pdf-export-container .text-red-300 { color: #FCA5A5 !important; }
+            #pdf-export-container .text-red-400 { color: #F87171 !important; }
+            #pdf-export-container .text-indigo-200 { color: #C7D2FE !important; }
+            #pdf-export-container .bg-gray-900 { background-color: #111827 !important; }
+            #pdf-export-container .bg-gray-800 { background-color: #1F2937 !important; }
+            #pdf-export-container .bg-red-900 { background-color: #7F1D1D !important; }
+            #pdf-export-container .border-primary { border-color: #FFD700 !important; }
+            #pdf-export-container .border-white { border-color: #FFFFFF !important; }
+            #pdf-export-container .border-gray-800 { border-color: #1F2937 !important; }
+            #pdf-export-container .border-red-500 { border-color: #EF4444 !important; }
+        `;
+        document.head.appendChild(styleEl);
+
         try {
             // Temporarily make visible (off-screen)
             element.style.display = 'block';
@@ -51,7 +74,7 @@ export function FullReport({ profile }: FullReportProps) {
             element.style.left = '-9999px';
 
             // Wait for styles to apply
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 200));
 
             // Import and use html2canvas
             const html2canvas = (await import('html2canvas')).default;
@@ -90,6 +113,10 @@ export function FullReport({ profile }: FullReportProps) {
             element.style.display = originalDisplay;
             element.style.position = originalPosition;
             element.style.left = originalLeft;
+
+            // Remove color override styles
+            const styleOverride = document.getElementById('pdf-color-override');
+            if (styleOverride) styleOverride.remove();
 
             if (btn) btn.innerHTML = '📥 Baixar Mapa (PDF)';
         }
@@ -267,8 +294,12 @@ export function FullReport({ profile }: FullReportProps) {
                 </div>
             </div>
 
-            {/* Hidden Container for PDF Export */}
-            <div id="pdf-export-container" className="fixed top-0 left-0 w-[1000px] bg-[#050510] text-white p-12 hidden">
+            {/* Hidden Container for PDF Export - Uses inline RGB colors to avoid oklab() issues */}
+            <div
+                id="pdf-export-container"
+                className="fixed top-0 left-0 w-[1000px] text-white p-12 hidden"
+                style={{ backgroundColor: '#050510' }}
+            >
                 <div className="mb-12 text-center border-b border-white/10 pb-8">
                     <h1 className="text-5xl font-cinzel text-primary mb-4">{profile.name}</h1>
                     <p className="text-xl text-gray-400">{profile.date} • Mapa Numerológico Completo</p>
