@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Meaning, getMeaning } from "@/app/actions";
 import { ResultCard } from "./result-card";
-import { personalYearMeanings, challengeMeanings, karmicLessonMeanings, hiddenTendencyMeanings } from "@/lib/data-definitions";
+import { CalculationBreakdown } from "./calculation-breakdown";
+import { personalYearMeanings, challengeMeanings, karmicLessonMeanings, hiddenTendencyMeanings, missionMeanings } from "@/lib/data-definitions";
 
 interface FullReportProps {
     profile: any;
+    name?: string;
+    date?: string;
 }
 
-export function FullReport({ profile }: FullReportProps) {
+export function FullReport({ profile, name, date }: FullReportProps) {
     const [meanings, setMeanings] = useState<Record<string, Meaning | undefined>>({});
     const [loading, setLoading] = useState(true);
 
@@ -163,6 +167,11 @@ export function FullReport({ profile }: FullReportProps) {
                 </button>
             </div>
 
+            {/* Calculation Breakdown */}
+            {name && date && (
+                <CalculationBreakdown name={name} date={date} profile={profile} />
+            )}
+
             {/* Interactive Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ResultCard number={profile.core.destiny} label="Caminho de Vida" meaning={meanings.destiny} />
@@ -171,39 +180,119 @@ export function FullReport({ profile }: FullReportProps) {
                 <ResultCard number={profile.core.expression} label="Expressão" meaning={meanings.expression} />
             </div>
 
-            {/* Forecast Section */}
-            <div className="bg-gradient-to-br from-indigo-900/40 to-black border border-white/10 p-8 rounded-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <span className="text-9xl font-cinzel text-white">{profile.forecast.personalYear}</span>
+            {/* Números Derivados Section */}
+            <div className="space-y-4">
+                <h3 className="text-2xl font-cinzel text-white px-2">Números Derivados</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-br from-cyan-900/30 to-black border border-cyan-500/20 p-6 rounded-2xl relative overflow-hidden">
+                        <h4 className="text-cyan-300 font-cinzel mb-4 text-lg">Número do Poder</h4>
+                        <div className="flex justify-center mb-4">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.core.powerNumber}.png`} alt={`Número ${profile.core.powerNumber}`} width={120} height={120} className="object-contain" />
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3 text-center">Expressão + Destino</p>
+                        <p className="text-sm text-gray-300 leading-relaxed">A energia disponível para agir, assumir responsabilidade e exercer liderança sobre si e sobre os outros.</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-red-900/30 to-black border border-red-500/20 p-6 rounded-2xl relative overflow-hidden">
+                        <h4 className="text-red-300 font-cinzel mb-4 text-lg">Número de Stress</h4>
+                        <div className="flex justify-center mb-4">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.core.stressNumber}.png`} alt={`Número ${profile.core.stressNumber}`} width={120} height={120} className="object-contain" />
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3 text-center">|Expressão - Destino|</p>
+                        <p className="text-sm text-gray-300 leading-relaxed">O conflito entre personalidade e missão da alma. Onde existe maior desgaste e stress energético.</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-yellow-900/30 to-black border border-yellow-500/20 p-6 rounded-2xl relative overflow-hidden">
+                        <h4 className="text-yellow-300 font-cinzel mb-4 text-lg">Número Final</h4>
+                        <div className="flex justify-center mb-4">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.core.finalNumber}.png`} alt={`Número ${profile.core.finalNumber}`} width={120} height={120} className="object-contain" />
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3 text-center">Integração Total</p>
+                        <p className="text-sm text-gray-300 leading-relaxed">O alinhamento entre Alma e Personalidade para encarnar verdadeiramente o papel kármico.</p>
+                    </div>
                 </div>
-                <h3 className="text-2xl font-cinzel text-white mb-2">Ano Pessoal {profile.forecast.personalYear}</h3>
-                <p className="text-indigo-200 text-sm mb-4">A vibração que rege seu momento atual (Jan-Dez).</p>
-                <div className="text-gray-300 leading-relaxed max-w-3xl glass-panel p-6 rounded-xl border border-white/5 text-justify">
-                    {personalYearMeanings[profile.forecast.personalYear] || "Vibração de transição."}
+            </div>
+
+            {/* Mission Section */}
+            {missionMeanings[profile.core.mission] && (
+                <div className="bg-gradient-to-br from-orange-900/30 to-black border border-orange-500/20 p-8 rounded-2xl">
+                    <div className="flex flex-col items-center gap-4 mb-6">
+                        <h3 className="text-2xl font-cinzel text-orange-300">Missão de Vida</h3>
+                        <Image src={`/assets/Num_Pequenos/Peq_${profile.core.mission}.png`} alt={`Número ${profile.core.mission}`} width={150} height={150} className="object-contain" />
+                        <p className="text-sm text-gray-400">Seu propósito e direcionamento espiritual</p>
+                    </div>
+                    <div className="text-gray-300 leading-relaxed text-justify bg-black/30 p-6 rounded-xl border border-orange-500/10">
+                        {missionMeanings[profile.core.mission]}
+                    </div>
+                </div>
+            )}
+
+
+            {/* Forecast Section - Expanded */}
+            <div className="space-y-4">
+                <h3 className="text-2xl font-cinzel text-white px-2">Previsões Pessoais</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-br from-indigo-900/40 to-black border border-indigo-500/20 p-6 rounded-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                            <span className="text-6xl font-cinzel text-white">{profile.forecast.personalYear}</span>
+                        </div>
+                        <h4 className="text-indigo-200 font-cinzel mb-2 text-lg">Ano Pessoal</h4>
+                        <div className="text-4xl font-bold text-indigo-400 mb-2 relative z-10">{profile.forecast.personalYear}</div>
+                        <p className="text-xs text-gray-400 mb-3">Vibração anual (Jan-Dez)</p>
+                        <p className="text-sm text-gray-300 leading-relaxed">{personalYearMeanings[profile.forecast.personalYear]?.substring(0, 120)}...</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-900/30 to-black border border-purple-500/20 p-6 rounded-2xl">
+                        <h4 className="text-purple-200 font-cinzel mb-4 text-lg">Mês Pessoal</h4>
+                        <div className="flex justify-center mb-4">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.forecast.personalMonth}.png`} alt={`Número ${profile.forecast.personalMonth}`} width={100} height={100} className="object-contain" />
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3 text-center">Ano Pessoal + Mês atual</p>
+                        <p className="text-sm text-gray-300 leading-relaxed">A energia e as tendências específicas para o mês vigente.</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-teal-900/30 to-black border border-teal-500/20 p-6 rounded-2xl">
+                        <h4 className="text-teal-200 font-cinzel mb-4 text-lg">Dia Pessoal</h4>
+                        <div className="flex justify-center mb-4">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.forecast.personalDay}.png`} alt={`Número ${profile.forecast.personalDay}`} width={100} height={100} className="object-contain" />
+                        </div>
+                        <p className="text-xs text-gray-400 mb-3 text-center">Mês Pessoal + Dia atual</p>
+                        <p className="text-sm text-gray-300 leading-relaxed">A vibração energética específica para o dia de hoje.</p>
+                    </div>
                 </div>
             </div>
 
             {/* Cycles Section */}
             <div className="space-y-4">
-                <h3 className="text-2xl font-cinzel text-white px-2">Ciclos de Vida</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <h3 className="text-2xl font-cinzel text-white px-2">Ciclos de Vida & Objetivo Kármico</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                        <h4 className="text-primary font-cinzel mb-2">1º Ciclo (Formativo)</h4>
-                        <div className="text-xs text-gray-400 mb-2">Do nascimento até {profile.cycles.cycle1.endAge} anos</div>
-                        <div className="text-3xl font-bold text-white mb-1">Regente {profile.cycles.cycle1.ruler}</div>
-                        <p className="text-xs text-gray-500">Influência do Mês</p>
+                        <h4 className="text-primary font-cinzel mb-3 text-center">1º Ciclo (Formativo)</h4>
+                        <div className="flex justify-center mb-3">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.cycles.cycle1.ruler}.png`} alt={`Número ${profile.cycles.cycle1.ruler}`} width={80} height={80} className="object-contain" />
+                        </div>
+                        <div className="text-xs text-gray-400 mb-2 text-center">Do nascimento até {profile.cycles.cycle1.endAge} anos</div>
+                        <p className="text-xs text-gray-500 text-center">Influência do Mês</p>
                     </div>
                     <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                        <h4 className="text-primary font-cinzel mb-2">2º Ciclo (Produtivo)</h4>
-                        <div className="text-xs text-gray-400 mb-2">Dos {profile.cycles.cycle1.endAge + 1} aos {profile.cycles.cycle2.endAge} anos</div>
-                        <div className="text-3xl font-bold text-white mb-1">Regente {profile.cycles.cycle2.ruler}</div>
-                        <p className="text-xs text-gray-500">Influência do Dia</p>
+                        <h4 className="text-primary font-cinzel mb-3 text-center">2º Ciclo (Produtivo)</h4>
+                        <div className="flex justify-center mb-3">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.cycles.cycle2.ruler}.png`} alt={`Número ${profile.cycles.cycle2.ruler}`} width={80} height={80} className="object-contain" />
+                        </div>
+                        <div className="text-xs text-gray-400 mb-2 text-center">Dos {profile.cycles.cycle1.endAge + 1} aos {profile.cycles.cycle2.endAge} anos</div>
+                        <p className="text-xs text-gray-500 text-center">Influência do Dia</p>
                     </div>
                     <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
-                        <h4 className="text-primary font-cinzel mb-2">3º Ciclo (Colheita)</h4>
-                        <div className="text-xs text-gray-400 mb-2">A partir dos {profile.cycles.cycle2.endAge + 1} anos</div>
-                        <div className="text-3xl font-bold text-white mb-1">Regente {profile.cycles.cycle3.ruler}</div>
-                        <p className="text-xs text-gray-500">Influência do Ano</p>
+                        <h4 className="text-primary font-cinzel mb-3 text-center">3º Ciclo (Colheita)</h4>
+                        <div className="flex justify-center mb-3">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.cycles.cycle3.ruler}.png`} alt={`Número ${profile.cycles.cycle3.ruler}`} width={80} height={80} className="object-contain" />
+                        </div>
+                        <div className="text-xs text-gray-400 mb-2 text-center">A partir dos {profile.cycles.cycle2.endAge + 1} anos</div>
+                        <p className="text-xs text-gray-500 text-center">Influência do Ano</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-rose-900/30 to-black border border-rose-500/20 p-6 rounded-2xl">
+                        <h4 className="text-rose-300 font-cinzel mb-3 text-center">Objetivo Kármico</h4>
+                        <div className="flex justify-center mb-3">
+                            <Image src={`/assets/Num_Pequenos/Peq_${profile.cycles.karmicObjective}.png`} alt={`Número ${profile.cycles.karmicObjective}`} width={80} height={80} className="object-contain" />
+                        </div>
+                        <div className="text-xs text-gray-400 mb-2 text-center">Meta espiritual final</div>
+                        <p className="text-xs text-gray-500 text-center">Regente do Ciclo 3</p>
                     </div>
                 </div>
             </div>
@@ -334,16 +423,56 @@ export function FullReport({ profile }: FullReportProps) {
                     </section>
 
                     <section>
-                        <h2 className="text-3xl font-cinzel text-white mb-6 border-l-4 border-white pl-4">Previsão Universal</h2>
-                        <div className="mb-8 p-6 bg-gray-900 border border-gray-800 rounded-xl">
-                            <h3 className="text-2xl font-cinzel text-primary mb-2">Ano Pessoal {profile.forecast.personalYear}</h3>
-                            <p className="text-gray-300 text-sm text-justify leading-relaxed">{personalYearMeanings[profile.forecast.personalYear]}</p>
+                        <h2 className="text-3xl font-cinzel text-white mb-6 border-l-4 border-white pl-4">Números Derivados</h2>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="p-6 bg-gray-900 rounded-xl border border-gray-800">
+                                <div className="text-cyan-400 font-bold mb-2">Número do Poder</div>
+                                <div className="text-4xl font-bold font-cinzel text-white mb-2">{profile.core.powerNumber}</div>
+                                <div className="text-xs text-gray-500 mb-2">Expressão + Destino</div>
+                                <div className="text-xs text-gray-400">Energia disponível para agir e liderar</div>
+                            </div>
+                            <div className="p-6 bg-gray-900 rounded-xl border border-gray-800">
+                                <div className="text-red-400 font-bold mb-2">Número de Stress</div>
+                                <div className="text-4xl font-bold font-cinzel text-white mb-2">{profile.core.stressNumber}</div>
+                                <div className="text-xs text-gray-500 mb-2">|Expressão - Destino|</div>
+                                <div className="text-xs text-gray-400">Conflito entre personalidade e missão</div>
+                            </div>
+                            <div className="p-6 bg-gray-900 rounded-xl border border-gray-800">
+                                <div className="text-yellow-400 font-bold mb-2">Número Final</div>
+                                <div className="text-4xl font-bold font-cinzel text-white mb-2">{profile.core.finalNumber}</div>
+                                <div className="text-xs text-gray-500 mb-2">Integração Total</div>
+                                <div className="text-xs text-gray-400">Alinhamento Alma-Personalidade</div>
+                            </div>
                         </div>
                     </section>
 
                     <section>
-                        <h2 className="text-3xl font-cinzel text-white mb-6 border-l-4 border-white pl-4">Ciclos de Vida</h2>
-                        <div className="grid grid-cols-3 gap-6">
+                        <h2 className="text-3xl font-cinzel text-white mb-6 border-l-4 border-white pl-4">Previsões Pessoais</h2>
+                        <div className="grid grid-cols-3 gap-6 mb-8">
+                            <div className="p-6 bg-gray-900 border border-gray-800 rounded-xl">
+                                <h3 className="text-xl font-cinzel text-indigo-400 mb-2">Ano Pessoal</h3>
+                                <div className="text-5xl font-bold font-cinzel text-white mb-2">{profile.forecast.personalYear}</div>
+                                <p className="text-gray-400 text-xs mb-3">Vibração anual (Jan-Dez)</p>
+                                <p className="text-gray-300 text-sm text-justify leading-relaxed">{personalYearMeanings[profile.forecast.personalYear]}</p>
+                            </div>
+                            <div className="p-6 bg-gray-900 border border-gray-800 rounded-xl">
+                                <h3 className="text-xl font-cinzel text-purple-400 mb-2">Mês Pessoal</h3>
+                                <div className="text-5xl font-bold font-cinzel text-white mb-2">{profile.forecast.personalMonth}</div>
+                                <p className="text-gray-400 text-xs mb-3">Ano + Mês atual</p>
+                                <p className="text-gray-300 text-sm">Energia do mês vigente</p>
+                            </div>
+                            <div className="p-6 bg-gray-900 border border-gray-800 rounded-xl">
+                                <h3 className="text-xl font-cinzel text-teal-400 mb-2">Dia Pessoal</h3>
+                                <div className="text-5xl font-bold font-cinzel text-white mb-2">{profile.forecast.personalDay}</div>
+                                <p className="text-gray-400 text-xs mb-3">Mês + Dia atual</p>
+                                <p className="text-gray-300 text-sm">Vibração do dia de hoje</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-3xl font-cinzel text-white mb-6 border-l-4 border-white pl-4">Ciclos de Vida & Objetivo Kármico</h2>
+                        <div className="grid grid-cols-4 gap-6">
                             <div className="p-6 bg-gray-900 rounded-xl border border-gray-800">
                                 <div className="text-primary font-bold mb-2">1º Ciclo (Nasc. ao {profile.cycles.cycle1.endAge} anos)</div>
                                 <div className="text-4xl font-bold font-cinzel text-white mb-1">Regente {profile.cycles.cycle1.ruler}</div>
@@ -358,6 +487,11 @@ export function FullReport({ profile }: FullReportProps) {
                                 <div className="text-primary font-bold mb-2">3º Ciclo (após {profile.cycles.cycle2.endAge} anos)</div>
                                 <div className="text-4xl font-bold font-cinzel text-white mb-1">Regente {profile.cycles.cycle3.ruler}</div>
                                 <div className="text-xs text-gray-500">Influência do Ano</div>
+                            </div>
+                            <div className="p-6 bg-gray-900 rounded-xl border border-rose-500/30">
+                                <div className="text-rose-400 font-bold mb-2">Objetivo Kármico</div>
+                                <div className="text-4xl font-bold font-cinzel text-white mb-1">{profile.cycles.karmicObjective}</div>
+                                <div className="text-xs text-gray-500">Meta espiritual final</div>
                             </div>
                         </div>
                     </section>

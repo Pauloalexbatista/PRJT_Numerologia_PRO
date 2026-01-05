@@ -95,7 +95,7 @@ export function HeroSection() {
                         animate={{ opacity: 1, y: 0 }}
                         className="w-full mt-12 pt-12 border-t border-white/10"
                     >
-                        <FullReport profile={result.profile} />
+                        <FullReport profile={result.profile} name={name} date={date} />
                     </motion.div>
                 )}
             </section>

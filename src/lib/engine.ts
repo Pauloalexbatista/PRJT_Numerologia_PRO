@@ -221,28 +221,74 @@ export class NumerologyEngine {
         const expression = this.calculateStringValue(name, 'all');
 
         const { day, month, year, destiny, personalYear } = this.calculateDestiny(date);
+
+        // MISSÃO / APRENDIZAGEM / KARMA
+        // Fórmula: Destino + Expressão
         const mission = this.reduce(destiny + expression);
+
+        // NÚMERO DO PODER
+        // Fórmula: Expressão + Vida (Destino)
+        // Representa: Energia disponível para agir
+        const powerNumber = this.reduce(expression + destiny);
+
+        // NÚMERO DE STRESS
+        // Fórmula: |Expressão - Vida|
+        // Representa: Conflito entre personalidade e missão
+        const stressNumber = this.reduce(Math.abs(expression - destiny));
+
+        // NÚMERO FINAL
+        // Fórmula: Expressão + Vida + Vogais + Consoantes
+        // Representa: Integração alma-personalidade
+        const finalNumber = this.reduce(expression + destiny + motivation + impression);
+
+        // MÊS PESSOAL
+        // Fórmula: Ano Pessoal + Mês atual
+        const currentMonth = new Date().getMonth() + 1; // 1-12
+        const personalMonth = this.reduce(personalYear + currentMonth);
+
+        // DIA PESSOAL
+        // Fórmula: Mês Pessoal + Dia atual
+        const currentDay = new Date().getDate();
+        const personalDay = this.reduce(personalMonth + currentDay);
 
         const analysis = this.calculateAnalysis(name);
         const cycles = this.calculateCycles(day, month, year, destiny);
         const challenges = this.calculateChallenges(day, month, year);
 
+        // OBJETIVO KÁRMICO
+        // É o número regente do Ciclo 3 (Colheita)
+        const karmicObjective = cycles.cycle3.ruler;
+
         return {
             name: name,
             date: date,
             core: {
-                motivation, // Soul
-                impression, // Personality
-                expression,
-                day,        // Day of Birth
-                destiny,    // Life Path
-                mission,
+                motivation,      // Alma (Vogais)
+                impression,      // Personalidade vista pelos outros (Consoantes)
+                expression,      // Número de Expressão = Personalidade (Nome completo)
+                day,            // Dia de Nascimento = Potencial
+                month,          // Mês de Nascimento = Via de materialização
+                destiny,        // Número de Vida = Missão de Vida
+                mission,        // Aprendizagem / Karma / Missão
+                powerNumber,    // Número do Poder
+                stressNumber,   // Número de Stress
+                finalNumber,    // Número Final
             },
-            analysis,
-            cycles,
-            challenges,
+            analysis: {
+                karmicLessons: analysis.karmicLessons,        // Ausências Kármicas
+                karmicHeritages: analysis.karmicLessons,      // Heranças Kármicas (alias)
+                hiddenTendencies: analysis.hiddenTendencies,  // Tendências Ocultas
+                temperament: analysis.temperament,
+            },
+            cycles: {
+                ...cycles,
+                karmicObjective,  // Objetivo Kármico (final dos ciclos)
+            },
+            challenges,  // Desafios Kármicos
             forecast: {
-                personalYear
+                personalYear,   // Ano Pessoal
+                personalMonth,  // Mês Pessoal
+                personalDay,    // Dia Pessoal
             }
         };
     }
